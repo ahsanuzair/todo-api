@@ -42,6 +42,17 @@
 - Never commit `node_modules` — always use `.gitignore`
 - `res.json()` vs `res.send()` — always use `res.json()` for APIs
 
+## How to Resume Tomorrow
+```bash
+# Navigate to project folder and open Claude Code
+cd ~/Documents/todo-api
+claude
+
+# Inside Claude Code, type:
+/resume
+# Pick the most recent session to continue with full chat history
+```
+
 ## How to Run
 ```bash
 node app.js
