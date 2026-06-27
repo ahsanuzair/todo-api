@@ -8,7 +8,7 @@ app.use('/todos', todoRouter)
 
 
 app.get('/',(req, res, next) => {
-    res.send('Hello World')
+    res.send('Hello World, server running')
 } )
 
 app.listen(port, () => {
