@@ -33,6 +33,29 @@ app.post('/todos', (req, res, next) => {
 
 })
 
+app.put('/todos/:id', (req, res, next) => {
+    const id = req.params.id
+    const todo = todos.find(t => t.id === parseInt(id))
+    if(!todo) {
+        return res.status(404).json({message: "Requested todo not found"})
+    }
+    todo.title = req.body.title || todo.title
+    todo.description = req.body.description || todo.description
+    todo.completed = req.body.completed !== undefined ? req.body.completed : todo.completed 
+
+    return res.json(todo)
+})
+
+app.delete("/todos/:id", (req, res, next) => {
+    const id = req.params.id
+    const todoIndex = todos.findIndex(t => t.id === parseInt(id))
+    if(todoIndex === -1) {
+        return res.status(404).json({message: "Todo not found for delete"})
+    }
+    todos.splice(todoIndex, 1)
+    res.json({message: "Todo Deleted"})
+})
+
 app.get('/',(req, res, next) => {
     res.send('Hello World')
 } )
