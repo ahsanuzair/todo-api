@@ -3,35 +3,34 @@
 ## Goal
 4-week backend development bootcamp to land a job. Week 1: build a Todo REST API with Node.js and Express.
 
-## Completed (Day 1)
-- Initialized project with `npm init -y`
-- Installed Express
-- Created `app.js` as the entry point
-- Built and tested:
-  - `GET /` — health check, returns "Hello World"
-  - `GET /todos` — returns all todos (empty array for now)
-  - `GET /todos/:id` — returns one todo by ID, 404 if not found
-  - `POST /todos` — creates a todo, returns 201 with the new todo
+## Completed (Days 1-3)
+- Initialized project, installed Express
+- Built all 5 CRUD routes: GET /todos, GET /todos/:id, POST /todos, PUT /todos/:id, DELETE /todos/:id
+- Refactored into proper folder structure: routes/ and controllers/
+- Installed nodemon — run server with `npm run dev`
+- Added input validation to POST route (title and description required, returns 400 if missing)
 - Created `.gitignore` (node_modules, .env)
 - Pushed to GitHub: https://github.com/ahsanuzair/todo-api
 
-## Current State of app.js
+## Current Project Structure
+```
+todo-api/
+├── app.js               ← server setup, mounts router
+├── routes/todos.js      ← route definitions
+├── controllers/todos.js ← business logic, todos array lives here
+└── package.json
+```
+
+## Current State
 - In-memory `todos` array (no database yet — Week 2)
 - `nextId` counter for auto-incrementing IDs
 - Todo object shape: `{ id, title, description, completed }`
 
-## Remaining Routes (Day 2)
-- `PUT /todos/:id` — update a todo (title, description, completed)
-- `DELETE /todos/:id` — delete a todo
+## Remaining (Day 4)
+- Error handling middleware — centralized error handling instead of per-route
 
-## Day 3-4 Plan
-- Refactor into folder structure: routes/, controllers/
-- Install nodemon for auto-restart
-- Add input validation (what if title is empty?)
-
-## Day 5 Plan
-- Add proper error handling middleware
-- Polish and final review
+## Week 2 Plan
+- Replace in-memory array with PostgreSQL database
 
 ## Key Concepts Covered
 - HTTP request/response cycle
