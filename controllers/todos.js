@@ -15,6 +15,12 @@ const getTodoById = (req, res) => {
 }
 
 const postTodo = (req, res) => {
+    if(!req.body.title){
+        return res.status(400).json({message: "Title can't be empty"})
+    }
+    if(!req.body.description){
+        return res.status(400).json({message: "Description can't be empty"})
+    }
     const newTodo = {
         id: nextId,
         title: req.body.title,
