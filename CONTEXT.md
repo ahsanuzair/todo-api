@@ -3,21 +3,22 @@
 ## Goal
 4-week backend development bootcamp to land a job. Week 1: build a Todo REST API with Node.js and Express.
 
-## Completed (Days 1-3)
+## ✅ Week 1 Complete
 - Initialized project, installed Express
 - Built all 5 CRUD routes: GET /todos, GET /todos/:id, POST /todos, PUT /todos/:id, DELETE /todos/:id
-- Refactored into proper folder structure: routes/ and controllers/
+- Refactored into proper folder structure: routes/, controllers/, middleware/
 - Installed nodemon — run server with `npm run dev`
-- Added input validation to POST route (title and description required, returns 400 if missing)
-- Created `.gitignore` (node_modules, .env)
+- Input validation on POST (title and description required, returns 400 if missing)
+- Centralized error handling middleware in middleware/errorHandler.js
 - Pushed to GitHub: https://github.com/ahsanuzair/todo-api
 
 ## Current Project Structure
 ```
 todo-api/
-├── app.js               ← server setup, mounts router
-├── routes/todos.js      ← route definitions
-├── controllers/todos.js ← business logic, todos array lives here
+├── app.js                      ← server setup, mounts router and error handler
+├── routes/todos.js             ← route definitions
+├── controllers/todos.js        ← business logic, todos array lives here
+├── middleware/errorHandler.js  ← centralized error handling
 └── package.json
 ```
 
@@ -25,12 +26,13 @@ todo-api/
 - In-memory `todos` array (no database yet — Week 2)
 - `nextId` counter for auto-incrementing IDs
 - Todo object shape: `{ id, title, description, completed }`
-
-## Remaining (Day 4)
-- Error handling middleware — centralized error handling instead of per-route
+- All errors go through errorHandler middleware via next(err)
 
 ## Week 2 Plan
-- Replace in-memory array with PostgreSQL database
+- Install PostgreSQL and connect to the database
+- Replace in-memory array with real database queries
+- Learn SQL: SELECT, INSERT, UPDATE, DELETE
+- Use `pg` package to connect Node.js to PostgreSQL
 
 ## Key Concepts Covered
 - HTTP request/response cycle
