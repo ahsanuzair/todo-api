@@ -1,0 +1,1 @@
+INSERT INTO todos (title, description, completed) VALUES ('todo title 1', 'todo description 1', false), ('todo title 2', 'todo description 2', false), ('todo title 3', 'todo description 3', false);
