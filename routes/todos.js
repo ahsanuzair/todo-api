@@ -1,6 +1,9 @@
 const express = require("express")
 const router = express.Router()
+const authMiddleware = require('../middleware/auth')
 const {getAllTodo, getTodoById, postTodo, putTodo, deleteTodo} = require('../controllers/todos')
+
+router.use(authMiddleware)
 
 router.get('/', getAllTodo)
 router.get('/:id', getTodoById)

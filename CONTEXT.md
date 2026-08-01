@@ -20,14 +20,28 @@
 - Rewrote all 5 controllers to use real SQL queries instead of in-memory array
 - Learned: async/await, try/catch, SQL injection prevention with $1/$2 placeholders, RETURNING *
 
+## ✅ Week 3 Complete
+- Wrote `Dockerfile` to containerize the Node app (base image `node:24`)
+- Wrote `docker-compose.yml` to run two services together: `app` (Node) and `db` (Postgres 16)
+- Wrote `.dockerignore` to keep `node_modules` and `.env` out of the image
+- Mounted `db/schema.sql` into `/docker-entrypoint-initdb.d/` on the `db` service, so the `todos` table is created automatically the first time the container starts
+- Learned: the containerized `db` is a completely separate Postgres instance from local Homebrew Postgres — different credentials, starts empty, and (with no named volume yet) resets on every `docker-compose down`
+- Learned: `app` connects to `db` using the service name `db` as the hostname (Docker Compose's built-in networking), not `localhost`
+- Ran `docker-compose up --build` and confirmed both containers start, the table is created, and all 5 CRUD routes work against the containerized stack via Postman
+- Pushed to GitHub
+
 ## Current Project Structure
 ```
 todo-api/
 ├── app.js                      ← server setup, mounts router and error handler
 ├── db/index.js                 ← PostgreSQL connection pool
+├── db/schema.sql                ← table definition, auto-run inside the db container
 ├── routes/todos.js             ← route definitions
 ├── controllers/todos.js        ← business logic with SQL queries
 ├── middleware/errorHandler.js  ← centralized error handling
+├── Dockerfile                   ← containerizes the Node app
+├── docker-compose.yml           ← runs app + Postgres together
+├── .dockerignore
 └── package.json
 ```
 
@@ -35,6 +49,7 @@ todo-api/
 - All 5 routes reading/writing from PostgreSQL `todo_db` database
 - Todo object shape: `{ id, title, description, completed }`
 - All errors go through errorHandler middleware via next(err)
+- App can run either locally (`npm run dev`, connects to local Homebrew Postgres) or fully containerized (`docker-compose up --build`, connects to the containerized Postgres)
 
 ## Database Setup
 - PostgreSQL via Homebrew, port 5432
@@ -43,9 +58,8 @@ todo-api/
 - Table: todos (id SERIAL PRIMARY KEY, title VARCHAR(255), description TEXT, completed BOOLEAN)
 - pgAdmin connected to localhost:5432 as macbookpro (server named "Homebrew PG")
 
-## Week 3 Plan
-- Docker — containerize the app and database
-- Learn docker-compose to run Node.js + PostgreSQL together
+## Week 4 Plan
+- TBD
 
 ## Key Concepts Covered
 - HTTP request/response cycle
@@ -60,10 +74,19 @@ todo-api/
 - Connection pooling with `pg` Pool
 
 ## How to Run
+
+**Locally (no Docker):**
 ```bash
 npm run dev
 # Server runs on http://localhost:3000
 # PostgreSQL must be running (it starts automatically on Mac with Homebrew)
+```
+
+**With Docker:**
+```bash
+docker-compose up --build
+# Server runs on http://localhost:3000
+# Postgres runs in its own container, table auto-created from db/schema.sql on first start
 ```
 
 ## Testing
