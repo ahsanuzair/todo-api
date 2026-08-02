@@ -30,36 +30,55 @@
 - Ran `docker-compose up --build` and confirmed both containers start, the table is created, and all 5 CRUD routes work against the containerized stack via Postman
 - Pushed to GitHub
 
+## ✅ Week 4 Complete — Auth + Ownership Scoping
+- Created `users` table: `id SERIAL PRIMARY KEY`, `email VARCHAR(255) UNIQUE NOT NULL`, `password_hash VARCHAR(60) NOT NULL`
+- Installed `bcrypt` and `jsonwebtoken`
+- Added `JWT_SECRET` to `.env`
+- Built `POST /auth/register`: validates email/password present, checks for duplicate email (409), hashes password with `bcrypt.hash(password, 10)`, inserts user, returns `id` + `email` (never the hash)
+- Built `POST /auth/login`: validates input, looks up user by email, verifies password with `bcrypt.compare`, issues a JWT (`jwt.sign({ id }, JWT_SECRET, { expiresIn: '1h' })`), returns the token
+- Built `middleware/auth.js`: reads `Authorization: Bearer <token>` header, verifies it with `jwt.verify`, attaches decoded payload to `req.user`, calls `next()` — responds 401 if missing/malformed/invalid
+- Applied auth middleware to all 5 todo routes at once via `router.use(authMiddleware)` in `routes/todos.js`
+- Added `user_id INTEGER NOT NULL REFERENCES users(id)` to `todos` — every todo now belongs to exactly one user
+- Updated all 5 todo controllers to scope by owner: `postTodo` inserts `user_id` from `req.user.id` (never from the request body), and `getAllTodo`/`getTodoById`/`putTodo`/`deleteTodo` all filter with `WHERE user_id = $x` — a todo belonging to another user returns the same 404 as a nonexistent one, so ids aren't leaked
+- Ported the `users` table and `todos.user_id` column into `db/schema.sql`, so it now matches the live local database and Docker will create both correctly on next rebuild
+- Tested full flow in Postman: register → login → blocked without token → works with valid token → confirmed a second user can't see/edit/delete the first user's todos
+- Learned: bcrypt hashing (one-way, salted, fixed 60-char output), JWT structure (header.payload.signature), why login/register must be POST not GET, why login errors should use a generic message (avoid leaking which emails are registered), `next()` vs `next(err)`, chaining multiple handlers per route, foreign keys (`REFERENCES`), why FK-referenced tables must be created first in schema.sql
+
 ## Current Project Structure
 ```
 todo-api/
-├── app.js                      ← server setup, mounts router and error handler
+├── app.js                      ← server setup, mounts routers and error handler
 ├── db/index.js                 ← PostgreSQL connection pool
-├── db/schema.sql                ← table definition, auto-run inside the db container
-├── routes/todos.js             ← route definitions
-├── controllers/todos.js        ← business logic with SQL queries
+├── db/schema.sql                ← table definitions (users + todos), auto-run inside the db container
+├── routes/todos.js             ← todo route definitions, protected by authMiddleware
+├── routes/auth.js              ← /auth/register, /auth/login route definitions
+├── controllers/todos.js        ← todo business logic with SQL queries
+├── controllers/auth.js         ← register/login logic (bcrypt + JWT)
 ├── middleware/errorHandler.js  ← centralized error handling
+├── middleware/auth.js          ← verifies JWT, attaches req.user
 ├── Dockerfile                   ← containerizes the Node app
-├── docker-compose.yml           ← runs app + Postgres together
+├── docker-compose.yml           ← runs app + Postgres together, named volume for data persistence
 ├── .dockerignore
 └── package.json
 ```
 
 ## Current State
-- All 5 routes reading/writing from PostgreSQL `todo_db` database
-- Todo object shape: `{ id, title, description, completed }`
+- All 5 todo routes reading/writing from PostgreSQL `todo_db` database, require a valid JWT, and are scoped to the logged-in user only
+- Todo object shape: `{ id, title, description, completed, user_id }`
+- `/auth/register` and `/auth/login` are public (no token required)
 - All errors go through errorHandler middleware via next(err)
-- App can run either locally (`npm run dev`, connects to local Homebrew Postgres) or fully containerized (`docker-compose up --build`, connects to the containerized Postgres)
+- App can run either locally (`npm run dev`, connects to local Homebrew Postgres) or fully containerized (`docker-compose up --build`, connects to the containerized Postgres) — currently running locally, schema.sql is in sync and ready for the next Docker rebuild
 
 ## Database Setup
 - PostgreSQL via Homebrew, port 5432
 - Username: macbookpro, no password
 - Database: todo_db
-- Table: todos (id SERIAL PRIMARY KEY, title VARCHAR(255), description TEXT, completed BOOLEAN)
+- Table: todos (id SERIAL PRIMARY KEY, title VARCHAR(255), description TEXT, completed BOOLEAN, user_id INTEGER NOT NULL REFERENCES users(id))
+- Table: users (id SERIAL PRIMARY KEY, email VARCHAR(255) UNIQUE NOT NULL, password_hash VARCHAR(60) NOT NULL)
 - pgAdmin connected to localhost:5432 as macbookpro (server named "Homebrew PG")
 
-## Week 4 Plan
-- TBD
+## Next Steps (beyond original 4-week plan)
+- TBD — options being considered: testing (Jest/Supertest), deployment (Render/Railway/Fly.io), API docs (README or Swagger/OpenAPI)
 
 ## Key Concepts Covered
 - HTTP request/response cycle
@@ -72,6 +91,11 @@ todo-api/
 - SQL: SELECT, INSERT, UPDATE, DELETE, WHERE, RETURNING *
 - SQL injection prevention with parameterized queries ($1, $2...)
 - Connection pooling with `pg` Pool
+- Password hashing with bcrypt (one-way, salted, fixed 60-char output)
+- JWT structure and signing (`header.payload.signature`, `jwt.sign`/`jwt.verify`, `expiresIn`)
+- Express middleware chaining (`router.use()`, multiple handlers per route, `next()` vs `next(err)`)
+- Auth header convention (`Authorization: Bearer <token>`)
+- Status codes: 401 Unauthorized, 409 Conflict
 
 ## How to Run
 
